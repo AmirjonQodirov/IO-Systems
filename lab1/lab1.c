@@ -19,15 +19,15 @@ static ssize_t dev_write(struct file *f, const char __user *ubuf, size_t len, lo
 static ssize_t proc_read(struct file *f, char __user *ubuf, size_t len, loff_t *ppos);
 static ssize_t proc_write(struct file *f, const char __user *ubuf, size_t len, loff_t *ppos);
 
-#define DRIVER_NAME "lab1_dev"
-#define DRIVER_CLASS "lab1_class"
-#define DEV_NAME "lab1"
-#define PROC_FILENAME "var4"
+#define DRIVER_NAME "lab_dev"
+#define DRIVER_CLASS "lab_class"
+#define DEV_NAME "lab"
+#define PROC_FILENAME "VAR4"
 #define BUF_SIZE 200
 #define MAX_SIZE 100
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Behruz Mansurov");
+MODULE_AUTHOR("Behruz Mansurov and Amir Kadyrov");
 MODULE_DESCRIPTION("A simple character device [VAR4]");
 
 static dev_t first; // Global variable for the first device number
@@ -93,7 +93,7 @@ static ssize_t proc_read(struct file *f, char __user *ubuf, size_t len, loff_t *
 		printk(KERN_INFO "[VAR4]: ERROR during read proc: failed copy to user buffer");
 		return -1;
 	}
-	*ppos = length;
+	*ppos += length;
 	return length;
 }
 
@@ -124,7 +124,7 @@ static ssize_t dev_write(struct file *f, const char __user *ubuf, size_t len, lo
 	sequence[seq_counter++] = space_counter;
 	size_t length;
 	length = strlen(buf);
-	*ppos = length;
+	*ppos += length;
 	return length;
 }
 

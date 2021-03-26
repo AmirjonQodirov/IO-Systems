@@ -19,10 +19,10 @@ static ssize_t dev_write(struct file *f, const char __user *ubuf, size_t len, lo
 static ssize_t proc_read(struct file *f, char __user *ubuf, size_t len, loff_t *ppos);
 static ssize_t proc_write(struct file *f, const char __user *ubuf, size_t len, loff_t *ppos);
 
-#define DRIVER_NAME "lab_dev"
-#define DRIVER_CLASS "lab_class"
-#define DEV_NAME "lab"
-#define DEV_2_NAME "lab_extra"
+#define DRIVER_NAME "lab_1_device"
+#define DRIVER_CLASS "lab_1_driver_class"
+#define DEV_NAME "lab_1"
+#define DEV_2_NAME "lab_1_extra"
 #define PROC_FILENAME "VAR4"
 #define BUF_SIZE 200
 #define MAX_SIZE 100
@@ -85,9 +85,7 @@ static ssize_t dev_read(struct file *f, char __user *ubuf, size_t len, loff_t *p
 static ssize_t dev_2_read(struct file *f, char __user *ubuf, size_t len, loff_t *ppos) {
 	printk(KERN_INFO "[VAR4 new device]: read()\n");
 	char buf[BUF_SIZE];
-	char *c_buf = buf;
-	c_buf += sprintf(c_buf, "%d ", tab_space_counter);
-	uint32_t length = buf - c_buf;
+	int length = sprintf(buf, "%d ", tab_space_counter);
 
 	if(*ppos > 0 || len < length) {
 		printk(KERN_INFO "[VAR4 new device]: ERROR during read new device: invalid offset");
@@ -191,24 +189,30 @@ static int __init chr_driver_init(void) {
 	if(alloc_chrdev_region(&first, 0, 1, DRIVER_NAME) < 0) {
 		return -1;
 	}
+	printk(KERN_INFO "<Major, Minor>: <%d, %d>\n", MAJOR(first), MINOR(first));
 
 	if(alloc_chrdev_region(&second, 0, 2, DRIVER_NAME) < 0) {
 		return -1;
 	}
+	printk(KERN_INFO "<Major, Minor>: <%d, %d>\n", MAJOR(second), MINOR(second));
 	
 	if((cl = class_create(THIS_MODULE, DRIVER_CLASS)) == NULL) {
 		unregister_chrdev_region(first, 1);
+		unregister_chrdev_region(second, 2);
 		return -1;
 	}
 	
 	if(device_create(cl, NULL, first, NULL, DEV_NAME) == NULL) {
 		class_destroy(cl);
 		unregister_chrdev_region(first, 1);
+		unregister_chrdev_region(second, 2);
 		return -1;
 	}
 
 	if(device_create(cl, NULL, second, NULL, DEV_2_NAME) == NULL) {
+		device_destroy(cl, first);
 		class_destroy(cl);
+		unregister_chrdev_region(first, 1);
 		unregister_chrdev_region(second, 2);
 		return -1;
 	}
@@ -218,24 +222,32 @@ static int __init chr_driver_init(void) {
 	cdev_init(&c_dev_2, &dev_ops_2);
 
 	if(cdev_add(&c_dev, first, 1) == -1) {
-		device_destroy(cl,first);
+		device_destroy(cl, first);
+		device_destroy(cl, second);
 		class_destroy(cl);
 		unregister_chrdev_region(first, 1);
+		unregister_chrdev_region(second, 2);
 		return -1;
 	}
 
-	if(cdev_add(&c_dev, second, 1) == -1) {
-		device_destroy(cl,second);
+	if(cdev_add(&c_dev_2, second, 2) == -1) {
+		cdev_del(&c_dev);
+		device_destroy(cl, first);
+		device_destroy(cl, second);
 		class_destroy(cl);
+		unregister_chrdev_region(first, 1);
 		unregister_chrdev_region(second, 2);
 		return -1;
 	}
 
 	if((entry = proc_create(PROC_FILENAME, 0777, NULL, &f_ops)) == NULL) {
 		cdev_del(&c_dev);
-		device_destroy(cl,first);
+		cdev_del(&c_dev_2);
+		device_destroy(cl, first);
+		device_destroy(cl, second);
 		class_destroy(cl);
 		unregister_chrdev_region(first, 1);
+		unregister_chrdev_region(second, 2);
 	}
 	printk(KERN_INFO "[VAR4]: registered");
 	return 0;
@@ -249,7 +261,7 @@ static void __exit chr_driver_exit(void) {
 	device_destroy(cl, second);
 	class_destroy(cl);
 	unregister_chrdev_region(first, 1);
-	unregister_chrdev_region(second, 1);
+	unregister_chrdev_region(second, 2);
 	proc_remove(entry);
 	printk(KERN_INFO "[VAR4]: unregistered");
 }

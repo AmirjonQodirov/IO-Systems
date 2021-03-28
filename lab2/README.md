@@ -35,14 +35,13 @@ Device       Boot Start    End Sectors Size Id Type
 /dev/mydisk1          1  20480   20480  10M 83 Linux
 /dev/mydisk2      20481  71680   51200  25M 83 Linux
 /dev/mydisk3      71681 102400   30720  15M 83 Linux
-
+```
 **Отформатировать разделы диска с помощью команды mkfs.vfat:** 
-`mkfs.vfat /dev/mydisk1
-
- mkfs.vfat /dev/mydisk2
-
- mkfs.vfat /dev/mydisk3
-`
+```
+mkfs.vfat /dev/mydisk1
+mkfs.vfat /dev/mydisk2
+mkfs.vfat /dev/mydisk3
+```
 Командой `dd if=/dev/urandmom of=/dev/mydisk1` заполняем сектор.
 
 ## Примеры использования
@@ -55,6 +54,7 @@ Device       Boot Start    End Sectors Size Id Type
 20480+0 records in
 20480+0 records out
 10485760 bytes (10 MB, 10 MiB) copied, 0,233639 s, 44,9 MB/s
+```
 
 ### Измерить скорость передачи данных при копировании файлов между разделами виртуального и реального жесткого диска:
 
@@ -64,3 +64,4 @@ Device       Boot Start    End Sectors Size Id Type
 30721+0 records in
 30720+0 records out
 15728640 bytes (16 MB, 15 MiB) copied, 0,291972 s, 53,9 MB/s
+```

@@ -10,7 +10,7 @@
 #include <linux/string.h>
 
 
-#define MEMSIZE 0xF000 // Size of Ram disk in sectors
+#define MEMSIZE 0x19020 // Size of Ram disk in sectors
 int c = 0; //Variable for Major Number 
 
 #define SECTOR_SIZE 512
@@ -47,7 +47,7 @@ typedef struct
 typedef PartEntry PartTable[4];
 
 #define SEC_PER_HEAD 63
-#define HEAD_PER_CYL 255
+#define HEAD_PER_CYL 256
 #define HEAD_SIZE (SEC_PER_HEAD * SECTOR_SIZE)
 #define CYL_SIZE (SEC_PER_HEAD * HEAD_PER_CYL * SECTOR_SIZE)
 
@@ -56,74 +56,166 @@ typedef PartEntry PartTable[4];
 #define cyl4size(s) ((s) / CYL_SIZE)
 
 
+#define count_sec(s) (((s) % SEC_PER_HEAD) + 1)
+#define count_head(s) (((s) / SEC_PER_HEAD) % HEAD_PER_CYL)
+#define count_cyl_hi(s) (((s) / (HEAD_PER_CYL * SEC_PER_HEAD)) & 0x300)
+#define count_cyl(s) (((s) / (HEAD_PER_CYL * SEC_PER_HEAD)) & 0xFF)
+
+// static unsigned char count_sec(uint size) {
+// 	return (size % SEC_PER_HEAD) + 1;
+// }
+
+// static unsigned char count_head(uint size) {
+// 	return (size / SEC_PER_HEAD) % HEAD_PER_CYL;
+// }
+
+// static unsigned char count_cyl_hi(uint size) {
+// 	return (size / (HEAD_PER_CYL * SEC_PER_HEAD)) & 0x300;
+// }
+
+// static unsigned char count_cyl(uint size) {
+// 	return (size / (HEAD_PER_CYL * SEC_PER_HEAD)) & 0xFF;
+// }
+
+
 static PartTable def_part_table =
 {
 	{
 		boot_type: 0x00,
-		start_sec: 0x2,
-		start_head: 0x0,
-		start_cyl: 0x0,
+		start_head: count_head(1),
+		start_sec: count_sec(1),
+		start_cyl_hi: count_cyl_hi(1),
+		start_cyl: count_cyl(1),
 		part_type: 0x83,
-		end_head: 0x3,
-		end_sec: 0x20,
-		end_cyl: 0x9F,
+		end_head: count_head(0x5000),
+		end_sec: count_sec(0x5000),
+		end_cyl_hi: count_cyl_hi(0x5000),
+		end_cyl: count_cyl(0x5000),
 		abs_start_sec: 0x1,
-		sec_in_part: 0x4FFF // 10Mbyte
+		sec_in_part: 0x5000 // 10Mbyte
 	},
+
 	{
 		boot_type: 0x00,
-		start_head: 0x4,
-		start_sec: 0x1,
-		start_cyl: 0x0,
-		part_type: 0x05, // extended partition type
-		end_sec: 0x20,
-		end_head: 0xB,
-		end_cyl: 0x9F,
-		abs_start_sec: 0x5000,
-		sec_in_part: 0xA000
-	}
+		start_head: count_head(0x5001),
+		start_sec: count_sec(0x5001),
+		start_cyl_hi: count_cyl_hi(0x5001),
+		start_cyl: count_cyl(0x5001),
+		part_type: 0x83,
+		end_head: count_head(0x50001 + 0xC800),
+		end_sec: count_sec(0x5000 + 0xC800),
+		end_cyl_hi: count_cyl_hi(0x5000 + 0xC800),
+		end_cyl: count_cyl(0x5000 + 0xC800),
+		abs_start_sec: 0x5001,
+		sec_in_part: 0xC800 // 25Mbyte
+	},
+
+	{
+		boot_type: 0x00,
+		start_head: count_head(0x11801),
+		start_sec: count_sec(0x11801),
+		start_cyl_hi: count_cyl_hi(0x11801),
+		start_cyl: count_cyl(0x11801),
+		part_type: 0x83,
+		end_head: count_head(0x11801 + 0x7800),
+		end_sec: count_sec(0x11801 + 0x7800),
+		end_cyl_hi: count_cyl_hi(0x11801 + 0x7800),
+		end_cyl: count_cyl(0x11801 + 0x7800),
+		abs_start_sec: 0x11801,
+		sec_in_part: 0x7800 // 15Mbyte
+	},
+
+	// {
+	// 	boot_type: 0x00,
+	// 	start_head: 0x4,
+	// 	start_sec: 0x1,
+	// 	start_cyl: 0x0,
+	// 	part_type: 0x05, // extended partition type
+	// 	end_sec: 0x20,
+	// 	end_head: 0xB,
+	// 	end_cyl: 0x9F,
+	// 	abs_start_sec: 0x5000,
+	// 	sec_in_part: 0xA000
+	// }
 };
-static unsigned int def_log_part_br_abs_start_sector[] = {0x5000, 0xA000};
+static unsigned int def_log_part_br_abs_start_sector[] = {};
 static const PartTable def_log_part_table[] =
 {
+	// {
+	// 	{
+	// 		boot_type: 0x00,
+	// 		start_head: 0x4,
+	// 		start_sec: 0x2, 
+	// 		start_cyl: 0x0, 
+	// 		part_type: 0x83,
+	// 		end_head: 0x7,
+	// 		end_sec: 0x20,
+	// 		end_cyl: 0x9F,
+	// 		abs_start_sec: 0x1,
+	// 		sec_in_part: 0x4FFF
+	// 	},
+	// 	{
+	// 		boot_type: 0x00,
+	// 		start_head: 0x8,
+	// 		start_sec: 0x01,
+	// 		start_cyl: 0x00,
+	// 		part_type: 0x05,
+	// 		end_head: 0xB,
+	// 		end_sec: 0x20,
+	// 		end_cyl: 0x9F,
+	// 		abs_start_sec: 0x5000,
+	// 		sec_in_part: 0x5000
+	// 	}
+	// },
+
 	{
 		{
 			boot_type: 0x00,
-			start_head: 0x4,
-			start_sec: 0x2, 
-			start_cyl: 0x0, 
+			start_head: count_head(1),
+			start_sec: count_sec(1),
+			start_cyl_hi: count_cyl_hi(1),
+			start_cyl: count_cyl(1),
 			part_type: 0x83,
-			end_head: 0x7,
-			end_sec: 0x20,
-			end_cyl: 0x9F,
+			end_head: count_head(0x5000),
+			end_sec: count_sec(0x5000),
+			end_cyl_hi: count_cyl_hi(0x5000),
+			end_cyl: count_cyl(0x5000),
 			abs_start_sec: 0x1,
-			sec_in_part: 0x4FFF
+			sec_in_part: 0x5000 // 10Mbyte
 		},
+	
+
+	
 		{
 			boot_type: 0x00,
-			start_head: 0x8,
-			start_sec: 0x01,
-			start_cyl: 0x00,
-			part_type: 0x05,
-			end_head: 0xB,
-			end_sec: 0x20,
-			end_cyl: 0x9F,
-			abs_start_sec: 0x5000,
-			sec_in_part: 0x5000
-		}
-	},
-	{
-		{
-			boot_type: 0x00,
-			start_head: 0x8,
-			start_sec: 0x02,
-			start_cyl: 0x00,
+			start_head: count_head(0x5001),
+			start_sec: count_sec(0x5001),
+			start_cyl_hi: count_cyl_hi(0x5001),
+			start_cyl: count_cyl(0x5001),
 			part_type: 0x83,
-			end_head: 0xB,
-			end_sec: 0x20,
-			end_cyl: 0x9F,
-			abs_start_sec: 0x1,
-			sec_in_part: 0x4FFF
+			end_head: count_head(0x50001 + 0xC800),
+			end_sec: count_sec(0x5000 + 0xC800),
+			end_cyl_hi: count_cyl_hi(0x5000 + 0xC800),
+			end_cyl: count_cyl(0x5000 + 0xC800),
+			abs_start_sec: 0x5001,
+			sec_in_part: 0xC800 // 25Mbyte
+		},
+	
+
+	
+		{
+			boot_type: 0x00,
+			start_head: count_head(0x11801),
+			start_sec: count_sec(0x11801),
+			start_cyl_hi: count_cyl_hi(0x11801),
+			start_cyl: count_cyl(0x11801),
+			part_type: 0x83,
+			end_head: count_head(0x11801 + 0x7800),
+			end_sec: count_sec(0x11801 + 0x7800),
+			end_cyl_hi: count_cyl_hi(0x11801 + 0x7800),
+			end_cyl: count_cyl(0x11801 + 0x7800),
+			abs_start_sec: 0x11801,
+			sec_in_part: 0x7800 // 15Mbyte
 		}
 	}
 };

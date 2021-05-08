@@ -61,25 +61,9 @@ typedef PartEntry PartTable[4];
 #define count_cyl_hi(s) (((s) / (HEAD_PER_CYL * SEC_PER_HEAD)) & 0x300)
 #define count_cyl(s) (((s) / (HEAD_PER_CYL * SEC_PER_HEAD)) & 0xFF)
 
-// static unsigned char count_sec(uint size) {
-// 	return (size % SEC_PER_HEAD) + 1;
-// }
-
-// static unsigned char count_head(uint size) {
-// 	return (size / SEC_PER_HEAD) % HEAD_PER_CYL;
-// }
-
-// static unsigned char count_cyl_hi(uint size) {
-// 	return (size / (HEAD_PER_CYL * SEC_PER_HEAD)) & 0x300;
-// }
-
-// static unsigned char count_cyl(uint size) {
-// 	return (size / (HEAD_PER_CYL * SEC_PER_HEAD)) & 0xFF;
-// }
-
-
 static PartTable def_part_table =
 {
+
 	{
 		boot_type: 0x00,
 		start_head: count_head(1),
@@ -87,137 +71,82 @@ static PartTable def_part_table =
 		start_cyl_hi: count_cyl_hi(1),
 		start_cyl: count_cyl(1),
 		part_type: 0x83,
-		end_head: count_head(0x5000),
-		end_sec: count_sec(0x5000),
-		end_cyl_hi: count_cyl_hi(0x5000),
-		end_cyl: count_cyl(0x5000),
+		end_head: count_head(0xEFFF),
+		end_sec: count_sec(0xEFFF),
+		end_cyl_hi: count_cyl_hi(0xEFFF),
+		end_cyl: count_cyl(0xEFFF),
 		abs_start_sec: 0x1,
-		sec_in_part: 0x5000 // 10Mbyte
+		sec_in_part: 0xEFFF // 30Mbyte
 	},
 
 	{
 		boot_type: 0x00,
-		start_head: count_head(0x5001),
-		start_sec: count_sec(0x5001),
-		start_cyl_hi: count_cyl_hi(0x5001),
-		start_cyl: count_cyl(0x5001),
-		part_type: 0x83,
-		end_head: count_head(0x50001 + 0xC800),
-		end_sec: count_sec(0x5000 + 0xC800),
-		end_cyl_hi: count_cyl_hi(0x5000 + 0xC800),
-		end_cyl: count_cyl(0x5000 + 0xC800),
-		abs_start_sec: 0x5001,
-		sec_in_part: 0xC800 // 25Mbyte
-	},
-
-	{
-		boot_type: 0x00,
-		start_head: count_head(0x11801),
-		start_sec: count_sec(0x11801),
-		start_cyl_hi: count_cyl_hi(0x11801),
-		start_cyl: count_cyl(0x11801),
-		part_type: 0x83,
-		end_head: count_head(0x11801 + 0x7800),
-		end_sec: count_sec(0x11801 + 0x7800),
-		end_cyl_hi: count_cyl_hi(0x11801 + 0x7800),
-		end_cyl: count_cyl(0x11801 + 0x7800),
-		abs_start_sec: 0x11801,
-		sec_in_part: 0x7800 // 15Mbyte
-	},
-
-	// {
-	// 	boot_type: 0x00,
-	// 	start_head: 0x4,
-	// 	start_sec: 0x1,
-	// 	start_cyl: 0x0,
-	// 	part_type: 0x05, // extended partition type
-	// 	end_sec: 0x20,
-	// 	end_head: 0xB,
-	// 	end_cyl: 0x9F,
-	// 	abs_start_sec: 0x5000,
-	// 	sec_in_part: 0xA000
-	// }
-};
-static unsigned int def_log_part_br_abs_start_sector[] = {};
-static const PartTable def_log_part_table[] =
-{
-	// {
-	// 	{
-	// 		boot_type: 0x00,
-	// 		start_head: 0x4,
-	// 		start_sec: 0x2, 
-	// 		start_cyl: 0x0, 
-	// 		part_type: 0x83,
-	// 		end_head: 0x7,
-	// 		end_sec: 0x20,
-	// 		end_cyl: 0x9F,
-	// 		abs_start_sec: 0x1,
-	// 		sec_in_part: 0x4FFF
-	// 	},
-	// 	{
-	// 		boot_type: 0x00,
-	// 		start_head: 0x8,
-	// 		start_sec: 0x01,
-	// 		start_cyl: 0x00,
-	// 		part_type: 0x05,
-	// 		end_head: 0xB,
-	// 		end_sec: 0x20,
-	// 		end_cyl: 0x9F,
-	// 		abs_start_sec: 0x5000,
-	// 		sec_in_part: 0x5000
-	// 	}
-	// },
-
-	{
-		{
-			boot_type: 0x00,
-			start_head: count_head(1),
-			start_sec: count_sec(1),
-			start_cyl_hi: count_cyl_hi(1),
-			start_cyl: count_cyl(1),
-			part_type: 0x83,
-			end_head: count_head(0x5000),
-			end_sec: count_sec(0x5000),
-			end_cyl_hi: count_cyl_hi(0x5000),
-			end_cyl: count_cyl(0x5000),
-			abs_start_sec: 0x1,
-			sec_in_part: 0x5000 // 10Mbyte
-		},
-	
-
-	
-		{
-			boot_type: 0x00,
-			start_head: count_head(0x5001),
-			start_sec: count_sec(0x5001),
-			start_cyl_hi: count_cyl_hi(0x5001),
-			start_cyl: count_cyl(0x5001),
-			part_type: 0x83,
-			end_head: count_head(0x50001 + 0xC800),
-			end_sec: count_sec(0x5000 + 0xC800),
-			end_cyl_hi: count_cyl_hi(0x5000 + 0xC800),
-			end_cyl: count_cyl(0x5000 + 0xC800),
-			abs_start_sec: 0x5001,
-			sec_in_part: 0xC800 // 25Mbyte
-		},
-	
-
-	
-		{
-			boot_type: 0x00,
-			start_head: count_head(0x11801),
-			start_sec: count_sec(0x11801),
-			start_cyl_hi: count_cyl_hi(0x11801),
-			start_cyl: count_cyl(0x11801),
-			part_type: 0x83,
-			end_head: count_head(0x11801 + 0x7800),
-			end_sec: count_sec(0x11801 + 0x7800),
-			end_cyl_hi: count_cyl_hi(0x11801 + 0x7800),
-			end_cyl: count_cyl(0x11801 + 0x7800),
-			abs_start_sec: 0x11801,
-			sec_in_part: 0x7800 // 15Mbyte
-		}
+		start_head: count_head(0xF000),
+		start_sec: count_sec(0xF000),
+		start_cyl_hi: count_cyl_hi(0xF000),
+		start_cyl: count_cyl(0xF000),
+		part_type: 0x05, // extended partition type
+		end_head: count_head(0xF0000 + 0xA000),
+		end_sec: count_sec(0xF000 + 0xA000),
+		end_cyl_hi: count_cyl_hi(0xF000 + 0xA000),
+		end_cyl: count_cyl(0xF000 + 0xA000),
+		abs_start_sec: 0xF000,
+		sec_in_part: 0xA000 // 20Mbyte
 	}
+};
+static unsigned int def_log_part_br_abs_start_sector[] = {0XF000, 0xA000};
+static const PartTable def_log_part_table[] =
+{	
+	{
+		{						
+			boot_type: 0x00,
+			start_head: count_head(0xF000 + 1),
+			start_sec: count_sec(0xF000 + 1),
+			start_cyl_hi: count_cyl_hi(0xF000 + 1),
+			start_cyl: count_cyl(0xF000 + 1),
+			part_type: 0x83,
+			end_head: count_head(0xF000 + 0x4FFF),
+			end_sec: count_sec(0xF000 + 0x4FFF),
+			end_cyl_hi: count_cyl_hi(0xF000 + 0x4FFF),
+			end_cyl: count_cyl(0xF000 + 0x4FFF),
+			abs_start_sec: 0x1,
+			sec_in_part: 0x4FFF // 10Mbyte
+		},
+
+		{
+			boot_type: 0x00,
+			start_head: count_head(0xF000 + 0x5000),
+			start_sec: count_sec(0xF000 + 0x5000),
+			start_cyl_hi: count_cyl_hi(0xF000 + 0x5000),
+			start_cyl: count_cyl(0xF000 + 0x5000),
+			part_type: 0x05,
+			end_head: count_head(0xF000 + 0x5000 + 0x4FFF),
+			end_sec: count_sec(0xF000 + 0x5000 + 0x4FFF),
+			end_cyl_hi: count_cyl_hi(0xF000 + 0x5000 + 0x4FFF),
+			end_cyl: count_cyl(0xF000 + 0x5000 + 0x4FFF),
+			abs_start_sec: 0x5000,
+			sec_in_part: 0x4FFF // 10Mbyte
+		}
+	},
+
+	{
+		{
+			boot_type: 0x00,
+			start_head: count_head(0xF000 + 0x5000 + 1),
+			start_sec: count_sec(0xF000 + 0x5000 + 1),
+			start_cyl_hi: count_cyl_hi(0xF000 + 0x5000 + 1),
+			start_cyl: count_cyl(0xF000 + 0x5000 + 1),
+			part_type: 0x83,
+			end_head: count_head(0xF000 + 0x5000 + 0x4FFF),
+			end_sec: count_sec(0xF000 + 0x5000 + 0x4FFF),
+			end_cyl_hi: count_cyl_hi(0xF000 + 0x5000 + 0x4FFF),
+			end_cyl: count_cyl(0xF000 + 0x5000 + 0x4FFF),
+			abs_start_sec: 0x1,
+			sec_in_part: 0x4FFF //10Mbyte																																																																																																																																																																																																																												 // 10Mbyte
+		}
+
+	}
+
 };
 
 static void copy_mbr(u8 *disk)

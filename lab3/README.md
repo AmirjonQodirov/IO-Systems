@@ -43,6 +43,6 @@ $ cat /proc/var4
 
 ## Примеры использования
 
-$echo "test" | nc -u 127.0.0.1 1234
+$echo "lab3" | nc -u 224.0.0.251 5555
 
 dmesg

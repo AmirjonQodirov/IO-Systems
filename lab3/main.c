@@ -43,7 +43,7 @@ static char check_frame(struct sk_buff *skb, unsigned char data_shift) {
         memcpy(data, user_data_ptr, data_len);
         data[data_len] = '\0';
 
-        //if(strstr(data, "mama")) {
+        if(strstr(data, "lab3")) {
             printk("Captured UDP datagram, saddr: %d.%d.%d.%d\n",
                     ntohl(ip->saddr) >> 24, (ntohl(ip->saddr) >> 16) & 0x00FF,
                     (ntohl(ip->saddr) >> 8) & 0x0000FF, (ntohl(ip->saddr)) & 0x000000FF);
@@ -54,13 +54,12 @@ static char check_frame(struct sk_buff *skb, unsigned char data_shift) {
     	   printk(KERN_INFO "Data length: %d. Data:", data_len);
             printk("%s", data);
             return 1;
-        //}
+        }
     }
     return 0;
 }
 
 static rx_handler_result_t handle_frame(struct sk_buff **pskb) {
-    // if (child) {
         
         	if (check_frame(*pskb, 0)) {
                 stats.rx_packets++;
@@ -71,7 +70,6 @@ static rx_handler_result_t handle_frame(struct sk_buff **pskb) {
             }
             (*pskb)->dev = child;
             return RX_HANDLER_ANOTHER;
-    //}   
     return RX_HANDLER_PASS; 
 } 
 
